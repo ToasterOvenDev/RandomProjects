@@ -1,0 +1,54 @@
+Screen {
+    layout: grid;
+    grid-size: 3;
+    grid-gutter: 1;
+}
+
+GenericInfoDisplay {
+    
+    grid-size: 3;
+    grid-columns: auto;
+    grid-rows: auto;
+    grid-gutter: 2;
+    height: auto;
+}
+
+CombatInfoDisplay {
+    
+    grid-size: 2;
+    grid-columns: auto;
+    grid-rows: auto;
+    grid-gutter: 2;
+    height: auto;
+    width: 50;
+}
+
+StatsDisplay {
+    width: auto;
+}
+
+Digits {
+    
+    background: $secondary-darken-1;
+    width: auto;
+    height: auto;
+    offset: 1 0;
+}
+
+Label {
+    offset: 3 0;
+    width: auto;
+    height: auto;
+}
+
+#inspiration {
+    offset: 0 1
+}
+#inspirationSwitch {
+    offset: 1 -1;
+    width: auto;
+    height: auto;
+}
+#inventoryScroll {
+    height: 5;
+}
