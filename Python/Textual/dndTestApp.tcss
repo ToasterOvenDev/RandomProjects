@@ -1,16 +1,17 @@
 Screen {
     layout: grid;
-    grid-size: 3;
+    grid-size: 3 4;
     grid-gutter: 1;
 }
 
 GenericInfoDisplay {
-    
+    column-span: 2;
     grid-size: 3;
     grid-columns: auto;
     grid-rows: auto;
     grid-gutter: 2;
     height: auto;
+    width: 100;
 }
 
 CombatInfoDisplay {
@@ -25,6 +26,7 @@ CombatInfoDisplay {
 
 StatsDisplay {
     width: auto;
+    border: solid blue;
 }
 
 Digits {
