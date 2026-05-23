@@ -2,10 +2,13 @@ import random
 import json
 import math
 
-def saveObject():
-        pass
+def saveObject(obj, filename):
+        with open(filename, 'w') as f:
+                json.dump(obj, f)
 
-# unserializing 
+def loadObject(filename):
+        with open(filename, 'r') as f:
+                return json.load(f)
 
 # Caracter Classes
 class character:
@@ -27,7 +30,7 @@ class character:
                 self.accessories = accessories # A list of the character's equipped accessories, which can be modified by equipping and unequipping accessories
                 self.active_effects = [] # A list of the character's active effects, such as stat boosts from boost items, or debuffs from enemy attacks
         
-        def __str__(self):
+        def __str__(self): # Temp way to print character data
                 printedData = {
                         "name":self.name,
                         "age":self.age,
@@ -74,6 +77,7 @@ class character:
                 return serializedEffects
         def serialize(self):
                 return {
+                        "object_type":"character",
                         "name":self.name,
                         "age":self.age,
                         "char_class":self.char_class.serialize(),
@@ -98,6 +102,10 @@ class character:
                 self.health = self.max_health
                 self.armor = int((200/math.pi)*math.atan(0.5*(self.stats["Constitution"] * self.race.armorModifier) / max(1, self.level)))
                 self.speed = int((200/math.pi)*math.atan(0.5*(self.stats["Dexterity"] * self.race.speedModifier) / max(1, self.level)))
+                if self.armor > self.stats["Constitution"]*5:
+                        self.armor = self.stats["Constitution"]*5
+                if self.speed > self.stats["Dexterity"]*5:
+                        self.speed = self.stats["Dexterity"]*5
         def levelUp(self):
                 self.level += 1
                 self.stat_points += 5
@@ -203,6 +211,7 @@ class player(character):
                 return None
         def serialize(self):
                 return {
+                        "object_type":"player",
                         "name":self.name,
                         "age":self.age,
                         "char_class":self.char_class.serialize(),
@@ -232,6 +241,7 @@ class npc(character):
         # Save/Load
         def serialize(self):
                 return {
+                        "object_type":"npc",
                         "name":self.name,
                         "age":self.age,
                         "char_class":self.char_class.serialize(),
@@ -261,6 +271,7 @@ class skill:
                 pass
         def serialize(self):
                 return {
+                        "object_type":"skill",
                         "name":self.name,
                         "description":self.description
                 }
@@ -275,6 +286,7 @@ class AttackSkill(skill):
                 target.damage(damage, user.level, self.damage_type)
         def serialize(self):
                 return {
+                        "object_type":"attack_skill",
                         "name":self.name,
                         "description":self.description,
                         "damage":self.damage,
@@ -295,6 +307,7 @@ class HealSkill(skill):
                         target.heal(heal)
         def serialize(self):
                 return {
+                        "object_type":"heal_skill",
                         "name":self.name,
                         "description":self.description,
                         "heal":self.heal,
@@ -311,6 +324,7 @@ class BuffSkill(skill): # Can also be used as a debuff skill if stat_changes are
                 effect.apply(target)
         def serialize(self):
                 return {
+                        "object_type":"buff_skill",
                         "name":self.name,
                         "description":self.description,
                         "stat_changes":self.stat_changes,
@@ -327,6 +341,7 @@ class item:
                 return self.usable
         def serialize(self):
                 return {
+                        "object_type":"item",
                         "name":self.name,
                         "description":self.description,
                         "usable":self.usable
@@ -344,11 +359,12 @@ class weapon(item):
                         self.effect.apply(target)
         def serialize(self):
                 return {
+                        "object_type":"weapon",
                         "name":self.name,
                         "description":self.description,
                         "usable":self.usable,
                         "damage":self.damage,
-                        "effect":self.effect.serialze(),
+                        "effect":self.effect.serialize(),
                         "damage_type":self.damage_type
                 }
 class accessory(item):
@@ -365,6 +381,7 @@ class accessory(item):
                 character.statChanged()
         def serialize(self):
                 return {
+                        "object_type":"accessory",
                         "name":self.name,
                         "description":self.description,
                         "usable":self.usable,
@@ -378,6 +395,7 @@ class healingItem(item):
                 user.heal(self.heal_amount)
         def serialize(self):
                 return {
+                        "object_type":"healing_item",
                         "name":self.name,
                         "description":self.description,
                         "usable":self.usable,
@@ -398,6 +416,7 @@ class boostItem(item):
                 return self.used
         def serialize(self):
                 return {
+                        "object_type":"boost_item",
                         "name":self.name,
                         "description":self.description,
                         "usable":self.usable,
@@ -436,6 +455,7 @@ class race:
                 return serialziedPClasses
         def serialize(self):
                 return {
+                        "object_type":"race",
                         "name":self.name,
                         "stats":self.stats,
                         "health":self.health,
@@ -465,6 +485,7 @@ class char_class:
                 return serializedSkills
         def serialize(self):
                 return {
+                        "object_type":"class",
                         "name":self.name,
                         "skills":self.serializeSkills(self.skills),
                         "starting_skills":self.serializeSkills(self.starting_skills)
@@ -498,6 +519,7 @@ class HiddenClass(char_class): # a class that will overhaul some aspects of the 
                 return serializedSkills
         def serialize(self):
                 return {
+                        "object_type":"hidden_class",
                         "name":self.name,
                         "skills":self.serializeSkills(self.skills),
                         "starting_skills":self.serializeSkills(self.starting_skills),
@@ -533,6 +555,7 @@ class Effect:
                         self.remove(character)
         def serialize(self):
                 return {
+                        "object_type":"effect",
                         "name":self.name,
                         "description":self.description,
                         "stat_changes":self.stat_changes,
@@ -546,6 +569,7 @@ class Passive:
                 self.description = description
         def serialize(self):
                 return {
+                        "object_type":"passive",
                         "name":self.name,
                         "description":self.description
                 }
@@ -559,6 +583,7 @@ class StaticPassive(Passive):
                 character.statChanged()
         def serialize(self):
                 return {
+                        "object_type":"static_passive",
                         "name":self.name,
                         "description":self.description,
                         "stat_changes":self.stat_changes
@@ -574,6 +599,7 @@ class ResistancePassive(Passive):
                 return damage
         def serialize(self):
                 return {
+                        "object_type":"resistance_passive",
                         "name":self.name,
                         "description":self.description,
                         "damage_type":self.damage_type,
@@ -587,6 +613,7 @@ class DodgePassive(Passive):
                 return self.dodge_bonus # Return the dodge bonus provided by the dodge passive
         def serialize(self):
                 return {
+                        "object_type":"dodge_passive",
                         "name":self.name,
                         "description":self.description,
                         "dodge_bonus":self.dodge_bonus
@@ -607,6 +634,7 @@ class RegenerationPassive(Passive):
                 character.heal(self.heal_amount) # Heal the character by the heal amount at the end of each turn
         def serialize(self):
                 return {
+                        "object_type":"regeneration_passive",
                         "name":self.name,
                         "description":self.description,
                         "heal_amount":self.heal_amount
@@ -1030,7 +1058,7 @@ upgradeAll(c)
 upgradeAll(c2)
 upgradeAll(c2)
 serializedPlayer = c.serialize()
-for i in range(1,100000):
+for i in range(1,2):
         c.levelUp()
         c2.levelUp()
         upgradeAll(c)
